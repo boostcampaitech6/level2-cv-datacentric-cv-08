@@ -1,3 +1,5 @@
 code/
 data/
 *.tar.gz
+*.ipynb
+!EDA.ipynb
