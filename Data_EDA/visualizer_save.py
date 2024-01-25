@@ -14,7 +14,8 @@ def visualize_annotations_2(json_path, source, output_dir):
         source (_type_): Image file path
         output_dir (_type_): bbox visualization image storage dir path
     """    
-
+    tag = ['masked', 'maintable', 'excluded-region', 'stamp']
+    select = True
     with open(json_path, 'r') as file:
         data = json.load(file)
         image_path = data["images"][source.split("/")[-1]]['words']
@@ -23,11 +24,17 @@ def visualize_annotations_2(json_path, source, output_dir):
 
     for i in image_path:
         B = image_path[i]
-        A = B['points']
-        pts = [(x, y) for x, y in A]
-        pts = np.array(pts, dtype=np.int32)
-        pts = pts.reshape((-1, 1, 2))
-        img = cv2.polylines(np.array(img), [pts], isClosed=True, color=(0, 0, 255), thickness=2)
+        select = True
+        for j in B['tags']:
+            if j in tag:
+                select = False
+                continue
+        if select:
+            A = B['points']
+            pts = [(x, y) for x, y in A]
+            pts = np.array(pts, dtype=np.int32)
+            pts = pts.reshape((-1, 1, 2))
+            img = cv2.polylines(np.array(img), [pts], isClosed=True, color=(0, 0, 255), thickness=2)
 
     file_name = os.path.basename(source)
     output_path = os.path.join(output_dir, file_name)
