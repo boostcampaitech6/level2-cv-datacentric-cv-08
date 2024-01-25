@@ -5,6 +5,16 @@ import numpy as np
 import os
 
 def visualize_annotations_2(json_path, source, output_dir):
+    """
+    Image 에 bbox를 Opencv 사용하여 가시화 후 저장
+    
+
+    Args:
+        json_path (_type_): Annotation json file path
+        source (_type_): Image file path
+        output_dir (_type_): bbox visualization image storage dir path
+    """    
+
     with open(json_path, 'r') as file:
         data = json.load(file)
         image_path = data["images"][source.split("/")[-1]]['words']
@@ -28,7 +38,7 @@ def visualize_annotations_2(json_path, source, output_dir):
     cv2.imwrite(output_path, img)
     print("Finished")
 
-# 사용 예시
+
 json_path = '/data/ephemeral/data/medical/ufo/train.json'
 source = '/data/ephemeral/data/medical/img/train/drp.en_ko.in_house.deepnatural_002754.jpg'
 output_dir = '/data/ephemeral/save_bbox' 
