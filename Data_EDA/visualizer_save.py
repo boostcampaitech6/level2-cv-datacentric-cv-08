@@ -45,8 +45,8 @@ def visualize_annotations_2(json_path, source, output_dir):
     cv2.imwrite(output_path, img)
     print("Finished")
 
-
-json_path = '/data/ephemeral/data/medical/ufo/train.json'
-source = '/data/ephemeral/data/medical/img/train/drp.en_ko.in_house.deepnatural_002754.jpg'
-output_dir = '/data/ephemeral/save_bbox' 
-visualize_annotations_2(json_path, source, output_dir)
+def viz_exp()->None:
+    json_path = '/data/ephemeral/data/medical/ufo/train.json'
+    source = '/data/ephemeral/data/medical/img/train/drp.en_ko.in_house.deepnatural_002754.jpg'
+    output_dir = '/data/ephemeral/save_bbox' 
+    visualize_annotations_2(json_path, source, output_dir)
