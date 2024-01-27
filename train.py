@@ -68,6 +68,7 @@ def do_training(data_dir, model_dir, device, image_size, input_size, num_workers
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[max_epoch // 2], gamma=0.1)
 
+    min_epoch_loss = 999
     model.train()
     for epoch in range(max_epoch):
         epoch_loss, epoch_start = 0, time.time()
@@ -91,7 +92,13 @@ def do_training(data_dir, model_dir, device, image_size, input_size, num_workers
                 pbar.set_postfix(val_dict)
 
         scheduler.step()
-
+        if (epoch_loss / num_batches <= min_epoch_loss):
+            min_epoch_loss = epoch_loss / num_batches
+            if not osp.exists(model_dir):
+                os.makedirs(model_dir)
+            
+            best_fpath = osp.join(model_dir, 'best.pth')
+            torch.save(model.state_dict(), best_fpath)
         print('Mean loss: {:.4f} | Elapsed time: {}'.format(
             epoch_loss / num_batches, timedelta(seconds=time.time() - epoch_start)))
 
