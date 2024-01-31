@@ -9,6 +9,7 @@ import cv2
 from torch import cuda
 from model import EAST
 from tqdm import tqdm
+from datetime import datetime
 
 from detect import detect
 
@@ -25,7 +26,7 @@ def parse_args():
     parser.add_argument('--output_dir', default=os.environ.get('SM_OUTPUT_DATA_DIR', 'predictions'))
 
     parser.add_argument('--device', default='cuda' if cuda.is_available() else 'cpu')
-    parser.add_argument('--input_size', type=int, default=2048)
+    parser.add_argument('--input_size', type=int, default=1024) #2048
     parser.add_argument('--batch_size', type=int, default=5)
 
     args = parser.parse_args()
@@ -46,7 +47,13 @@ def do_inference(model, ckpt_fpath, data_dir, input_size, batch_size, split='tes
     for image_fpath in tqdm(glob(osp.join(data_dir, 'img/{}/*'.format(split)))):
         image_fnames.append(osp.basename(image_fpath))
 
-        images.append(cv2.imread(image_fpath)[:, :, ::-1])
+        # Try reading the image, handle None case
+        img = cv2.imread(image_fpath)
+        if img is not None:
+            images.append(img[:, :, ::-1])
+        else:
+            print(f"Warning: Failed to read image {image_fpath}. Skipping.")
+
         if len(images) == batch_size:
             by_sample_bboxes.extend(detect(model, images, input_size))
             images = []
@@ -60,6 +67,7 @@ def do_inference(model, ckpt_fpath, data_dir, input_size, batch_size, split='tes
         ufo_result['images'][image_fname] = dict(words=words_info)
 
     return ufo_result
+
 
 
 def main(args):
@@ -79,10 +87,12 @@ def main(args):
                                 args.batch_size, split='test')
     ufo_result['images'].update(split_result['images'])
 
-    output_fname = 'output.csv'
+    # Add current timestamp to the output file name
+    current_time = datetime.now().strftime("%m%d%H%M")
+    output_fname = f'output_{current_time}.csv'
+
     with open(osp.join(args.output_dir, output_fname), 'w') as f:
         json.dump(ufo_result, f, indent=4)
-
 
 if __name__ == '__main__':
     args = parse_args()
