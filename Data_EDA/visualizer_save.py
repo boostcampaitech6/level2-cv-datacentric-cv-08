@@ -76,9 +76,9 @@ def visualize_annotations_csv(csv_path, source, output_dir):
                 code_str += line[0].replace(" ", "")
 
             cnt = cnt + 1 if line[0].replace(" ", "") == "}" else 0
-            if cnt > 2: break
+            if cnt > 3: break
 
-    code_str += "}}"
+    code_str += "}"
 
     # eval func을 통해 str -> dict 변환
     annotation = eval(code_str)['images'][source.split("/")[-1]]["words"]
