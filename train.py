@@ -2,6 +2,8 @@ import os
 import os.path as osp
 import time
 import math
+import numpy as np
+import random 
 from datetime import timedelta
 from argparse import ArgumentParser
 
@@ -21,7 +23,7 @@ def parse_args():
 
     # Conventional args
     parser.add_argument('--data_dir', type=str,
-                        default=os.environ.get('SM_CHANNEL_TRAIN', '../data/medical'))
+                    default=os.environ.get('SM_CHANNEL_TRAIN', '../data/medical'))
     parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_MODEL_DIR',
                                                                         'trained_models'))
 
@@ -35,6 +37,8 @@ def parse_args():
     parser.add_argument('--max_epoch', type=int, default=150)
     parser.add_argument('--save_interval', type=int, default=5)
     parser.add_argument('--ignore_tags', type=list, default=['masked', 'excluded-region', 'maintable', 'stamp'])
+    parser.add_argument('--color_jitter', type=bool, default=False)
+    parser.add_argument('--clahe', type=bool, default=False)
 
     args = parser.parse_args()
 
@@ -45,13 +49,15 @@ def parse_args():
 
 
 def do_training(data_dir, model_dir, device, image_size, input_size, num_workers, batch_size,
-                learning_rate, max_epoch, save_interval, ignore_tags):
+                learning_rate, max_epoch, save_interval, ignore_tags, color_jitter, clahe):
     dataset = SceneTextDataset(
         data_dir,
         split='train',
         image_size=image_size,
         crop_size=input_size,
-        ignore_tags=ignore_tags
+        ignore_tags=ignore_tags,
+        color_jitter=color_jitter,
+        clahe=clahe
     )
     dataset = EASTDataset(dataset)
     num_batches = math.ceil(len(dataset) / batch_size)
